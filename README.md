@@ -55,8 +55,8 @@ Las decisiones de diseño están justificadas en [`docs/decisiones-tecnicas.md`]
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/MaryG0107/flashstore.git
-cd flashstore
+git clone https://github.com/MaryG0107/ProyectoFinal-QA.git
+cd ProyectoFinal-QA
 
 # 2. Crear el archivo de variables (NUNCA se sube al repositorio)
 cp .env.example .env
