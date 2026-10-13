@@ -3,7 +3,7 @@
 E-commerce de alta concurrencia para campañas de venta flash.
 Proyecto final del curso **048 – Aseguramiento de la Calidad del Software** (UMG).
 
-> **Estado:** Fase 1 – backend (API + Worker), base de datos, Redis, RabbitMQ y ambiente Docker.
+> **Estado:** Fase 1 (backend, datos, Redis, RabbitMQ, Docker) ✅ · Fase 2 (PWA web/desktop/móvil con cola offline) ✅
 
 ---
 
@@ -35,6 +35,7 @@ Proyecto final del curso **048 – Aseguramiento de la Calidad del Software** (U
 | Infraestructura | `backend/src/FlashStore.Infrastructure` | PostgreSQL (Npgsql + Dapper), Redis, RabbitMQ y patrón Outbox |
 | API | `backend/src/FlashStore.Api` | Endpoints REST, JWT, roles, rate limiting, cabeceras de seguridad |
 | Worker | `backend/src/FlashStore.Worker` | Consumidores de RabbitMQ con idempotencia, reintentos y DLQ |
+| PWA | `frontend/` | React + Vite + Service Worker; cola offline en IndexedDB; Nginx con proxy `/api` |
 | Pruebas unitarias | `tests/unit/FlashStore.UnitTests` | xUnit sobre las reglas de negocio |
 
 Las decisiones de diseño están justificadas en [`docs/decisiones-tecnicas.md`](docs/decisiones-tecnicas.md).
@@ -79,13 +80,14 @@ Respuesta esperada de `/health`:
 
 | Servicio | URL / puerto en el host |
 |---|---|
+| **PWA (web, desktop y móvil)** | **http://localhost:3000** |
 | API + Swagger | http://localhost:5000/swagger |
 | RabbitMQ (consola web) | http://localhost:15672 (usuario y clave de `.env`) |
 | PostgreSQL | `localhost:5433` |
 | Redis | `localhost:6380` |
 
 > Los puertos evitan los que ya usan Jenkins (8080), SonarQube (9000) y Dependency-Track (8081/8082) en la VM.
-> Si la VM está en VirtualBox con NAT, agregue el reenvío de los puertos 5000 y 15672.
+> Si la VM está en VirtualBox con NAT, agregue el reenvío de los puertos 3000, 5000, 5433 y 15672 (IP anfitrión `127.0.0.1`).
 
 ---
 
@@ -247,8 +249,9 @@ flashstore/
 ├── .env.example                ← variables (copiar a .env)
 ├── backend/src/                ← Domain, Infrastructure, Api, Worker
 ├── db/init/                    ← esquema y datos de prueba de PostgreSQL
-├── frontend/                   ← PWA (Fase 2)
-├── mobile/                     ← flujos móviles de la PWA (Fase 2)
+├── frontend/                   ← PWA React (web, desktop y móvil)
+├── mobile/                     ← instalación de la PWA en Android y flujos Maestro
+├── scripts/                    ← sync-env.ps1 (envía el .env de Windows a la VM)
 ├── cli/                        ← CLI "flashstore" (Fase 3)
 ├── infrastructure/terraform/   ← Azure + Terraform (Fase 4)
 ├── ansible/                    ← playbooks (Fase 4)
@@ -262,7 +265,7 @@ flashstore/
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Backend, base de datos, Redis, RabbitMQ, Docker, pruebas unitarias, k6 del escenario crítico | ✅ |
-| 2 | PWA (web, desktop y móvil) con cola offline | ⏳ |
+| 2 | PWA (web, desktop y móvil) con cola offline | ✅ |
 | 3 | CLI `flashstore` | ⏳ |
 | 4 | Terraform (Azure) + Ansible | ⏳ |
 | 5 | Jenkins: pipeline de infraestructura y pipeline de calidad/seguridad con GO/NO-GO | ⏳ |

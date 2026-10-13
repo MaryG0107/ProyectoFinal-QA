@@ -5,6 +5,7 @@
 #
 # Puertos elegidos para NO chocar con lo que ya corre en la VM:
 #   Jenkins 8080, SonarQube 9000, Dependency-Track 8081/8082
+# PWA: http://localhost:3000   API/Swagger: http://localhost:5000/swagger
 # =============================================================
 
 name: flashstore
@@ -113,6 +114,18 @@ services:
       RabbitMq__User: ${RABBITMQ_USER:-flashstore}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
       Worker__SimulateFailureQueue: ${SIMULATE_CONSUMER_FAILURE:-}
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: flashstore-web:local
+    container_name: flashstore-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3000:8080"   # PWA (web, desktop y móvil) + proxy /api
 
 volumes:
   postgres-data:
