@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/node_modules/
+.git/
+.env
+reports/
+docs/
+frontend/
+mobile/
+tests/
+infrastructure/
+ansible/

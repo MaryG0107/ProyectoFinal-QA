@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Reglas de negocio puras: sin dependencias externas para que sean fáciles de probar. -->
+  <PropertyGroup>
+    <RootNamespace>FlashStore.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

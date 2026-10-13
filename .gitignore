@@ -1,0 +1,41 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+coverage*/
+
+# Node / PWA
+node_modules/
+dist/
+.vite/
+
+# Secretos (NUNCA al repositorio)
+.env
+*.pem
+*.pfx
+appsettings.*.local.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+.terraform.lock.hcl.bak
+
+# Ansible
+*.retry
+
+# Cypress / Maestro
+tests/cypress/videos/
+tests/cypress/screenshots/
+.maestro/
+
+# Sistema operativo / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
