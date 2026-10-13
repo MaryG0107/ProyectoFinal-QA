@@ -6,6 +6,7 @@ using FlashStore.Api.Payments;
 using FlashStore.Api.Security;
 using FlashStore.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -138,6 +139,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Detrás de Nginx (PWA): la IP real del cliente llega en X-Forwarded-For.
+// Solo se confía en proxies de redes privadas (la red interna de Docker).
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(System.Net.IPAddress.Parse("172.16.0.0"), 12));
+    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(System.Net.IPAddress.Parse("10.0.0.0"), 8));
+    options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(System.Net.IPAddress.Parse("192.168.0.0"), 16));
+});
+
 // Errores no controlados → ProblemDetails sin exponer el stack trace.
 builder.Services.AddProblemDetails();
 
@@ -149,6 +162,7 @@ if (inventoryOptions.Strategy == InventoryStrategy.Unsafe)
         "ATENCIÓN: Inventory:Strategy=Unsafe. Modo inseguro con sobreventa intencional (escenario NO-GO). No usar en producción.");
 }
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 
 // Cabeceras de seguridad (reducen hallazgos de OWASP ZAP).
