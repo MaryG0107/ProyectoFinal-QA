@@ -39,3 +39,10 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Reportes generados por el CLI y las pruebas (Jenkins los archiva como artefactos)
+reports/cli/
+reports/unit/
+reports/go-no-go.*
+reports/performance/*.json
+cli/**/nupkg/

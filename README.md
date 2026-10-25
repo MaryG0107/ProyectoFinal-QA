@@ -260,13 +260,27 @@ flashstore/
 └── reports/                    ← evidencias: sonar, fortify, dependency-check, zap, performance
 ```
 
+## CLI `flashstore`
+
+Todo el proyecto se puede operar desde la terminal. Instalación y referencia completa en [`cli/README.md`](cli/README.md).
+
+```powershell
+dotnet pack cli/FlashStore.Cli -c Release
+dotnet tool install --global --add-source cli/FlashStore.Cli/nupkg flashstore
+
+flashstore health                         # salud de la API y dependencias
+flashstore db reset-flash-sale --yes      # producto 1 con 5 unidades
+flashstore sale simulate --buyers 300     # escenario crítico: 0 sobreventa = código 0
+flashstore report go-no-go                # decisión GO/NO-GO (código 0 = GO)
+```
+
 ## Hoja de ruta
 
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Backend, base de datos, Redis, RabbitMQ, Docker, pruebas unitarias, k6 del escenario crítico | ✅ |
 | 2 | PWA (web, desktop y móvil) con cola offline | ✅ |
-| 3 | CLI `flashstore` | ⏳ |
+| 3 | CLI `flashstore` | ✅ |
 | 4 | Terraform (Azure) + Ansible | ⏳ |
 | 5 | Jenkins: pipeline de infraestructura y pipeline de calidad/seguridad con GO/NO-GO | ⏳ |
 | 6 | Insomnia, Cypress, Maestro, ZAP, k6 (load/stress/spike), Lighthouse | ⏳ |
