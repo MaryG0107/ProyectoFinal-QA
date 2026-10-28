@@ -1,0 +1,6 @@
+# Ejemplo. El archivo real (gcp.ini) lo genera Terraform con la IP de la VM.
+[flashstore]
+flashstore-qa ansible_host=203.0.113.50 ansible_user=mary ansible_ssh_private_key_file=~/.ssh/flashstore_gcp
+
+[flashstore:vars]
+ansible_python_interpreter=/usr/bin/python3

@@ -1,0 +1,30 @@
+---
+# =============================================================
+# FlashStore - despliegue completo en la VM creada por Terraform
+#
+# Uso (desde ansible/):
+#   set -a; source ~/.gcp/flashstore-secrets.env; set +a
+#   ansible-playbook playbooks/site.yml
+#
+# Variables útiles (-e):
+#   flashstore_inventory_strategy=Unsafe   -> release NO-GO (rc1)
+#   flashstore_login_rate_limit=1000       -> prueba k6 de 300 usuarios
+#   flashstore_git_ref=v1.0.0-rc2          -> desplegar una etiqueta concreta
+# =============================================================
+
+- name: Esperar a que la VM responda por SSH
+  hosts: flashstore
+  gather_facts: false
+  tasks:
+    - name: Esperar conexión SSH (la VM puede tardar en arrancar)
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 300
+
+- name: Preparar el servidor y desplegar FlashStore
+  hosts: flashstore
+  become: true
+  roles:
+    - base
+    - docker
+    - flashstore

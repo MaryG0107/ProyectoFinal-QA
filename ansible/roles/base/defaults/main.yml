@@ -1,0 +1,5 @@
+---
+# Swap de respaldo: la compilación de las imágenes .NET puede pasar de 4 GB de RAM.
+base_swap_file: /swapfile
+base_swap_size_mb: 2048
+base_timezone: America/Guatemala

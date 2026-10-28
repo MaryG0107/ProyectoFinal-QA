@@ -1,0 +1,111 @@
+---
+# =============================================================
+# Despliegue de FlashStore con Docker Compose
+# =============================================================
+
+- name: Validar que los secretos llegaron por variables de entorno
+  ansible.builtin.assert:
+    that:
+      - flashstore_postgres_password | length >= 12
+      - flashstore_rabbitmq_password | length >= 12
+      - flashstore_jwt_key | length >= 32
+      - flashstore_inventory_strategy in ['Atomic', 'Unsafe']
+    fail_msg: >-
+      Faltan secretos o son muy cortos. Ejecute antes:
+      set -a; source ~/.gcp/flashstore-secrets.env; set +a
+    success_msg: "Secretos presentes (no se muestran)"
+    quiet: true
+  no_log: true
+
+- name: Empaquetar la versión indicada del repositorio (en la controladora)
+  ansible.builtin.command:
+    cmd: >-
+      git -C {{ flashstore_repo_root }} archive --format=tar.gz
+      -o {{ flashstore_release_archive }} {{ flashstore_git_ref }}
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: true  # noqa: command-instead-of-module
+
+- name: Commit que se va a desplegar
+  ansible.builtin.command:
+    cmd: "git -C {{ flashstore_repo_root }} rev-parse --short {{ flashstore_git_ref }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: flashstore_release_commit
+  changed_when: false  # noqa: command-instead-of-module
+
+- name: Borrar el código anterior (los volúmenes de Docker NO se tocan)
+  ansible.builtin.file:
+    path: "{{ flashstore_app_dir }}"
+    state: absent
+
+- name: Crear carpeta de la app
+  ansible.builtin.file:
+    path: "{{ flashstore_app_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Copiar y descomprimir el código
+  ansible.builtin.unarchive:
+    src: "{{ flashstore_release_archive }}"
+    dest: "{{ flashstore_app_dir }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Archivo .env con los secretos (permisos 600)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ flashstore_app_dir }}/.env"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+  no_log: true
+
+- name: Registrar la versión desplegada
+  ansible.builtin.copy:
+    dest: "{{ flashstore_app_dir }}/RELEASE"
+    content: |
+      ref={{ flashstore_git_ref }}
+      commit={{ flashstore_release_commit.stdout }}
+      inventory_strategy={{ flashstore_inventory_strategy }}
+      deployed_at={{ ansible_date_time.iso8601 }}
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Construir y levantar los contenedores (puede tardar 5-10 min la primera vez)
+  ansible.builtin.command:
+    cmd: docker compose up -d --build --remove-orphans
+    chdir: "{{ flashstore_app_dir }}"
+  register: flashstore_compose_up
+  changed_when: true
+
+- name: Esperar a que la API responda /health
+  ansible.builtin.uri:
+    url: "http://localhost:5000/health"
+    return_content: true
+    status_code: 200
+  register: flashstore_health
+  until: flashstore_health.status == 200
+  retries: "{{ flashstore_health_retries }}"
+  delay: "{{ flashstore_health_delay }}"
+
+- name: Estado de los contenedores
+  ansible.builtin.command:
+    cmd: docker compose ps --format "table {{ '{{' }}.Name{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+    chdir: "{{ flashstore_app_dir }}"
+  register: flashstore_compose_ps
+  changed_when: false
+
+- name: Resumen del despliegue
+  ansible.builtin.debug:
+    msg:
+      - "Versión: {{ flashstore_git_ref }} ({{ flashstore_release_commit.stdout }}) - inventario {{ flashstore_inventory_strategy }}"
+      - "PWA:  http://{{ ansible_host }}:3000"
+      - "API:  http://{{ ansible_host }}:5000/swagger"
+      - "Salud: {{ flashstore_health.content }}"
+      - "{{ flashstore_compose_ps.stdout_lines }}"

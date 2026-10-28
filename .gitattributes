@@ -1,0 +1,7 @@
+# Los scripts y archivos que corren en Linux siempre con fin de línea LF
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.cfg  text eol=lf
+*.tf   text eol=lf
+*.tftpl text eol=lf
+*.j2   text eol=lf
