@@ -46,3 +46,8 @@ reports/unit/
 reports/go-no-go.*
 reports/performance/*.json
 cli/**/nupkg/
+
+# Google Cloud (fase 4): inventario generado por Terraform y llaves
+ansible/inventory/gcp.ini
+*.json.key
+flashstore-secrets.env

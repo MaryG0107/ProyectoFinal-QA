@@ -253,8 +253,8 @@ flashstore/
 ├── mobile/                     ← instalación de la PWA en Android y flujos Maestro
 ├── scripts/                    ← sync-env.ps1 (envía el .env de Windows a la VM)
 ├── cli/                        ← CLI "flashstore" (Fase 3)
-├── infrastructure/terraform/   ← Azure + Terraform (Fase 4)
-├── ansible/                    ← playbooks (Fase 4)
+├── infrastructure/terraform/   ← Google Cloud + Terraform (Fase 4)
+├── ansible/                    ← roles base, docker y flashstore (Fase 4)
 ├── tests/                      ← unit, integration, api, cypress, maestro, performance, security
 ├── docs/                       ← plan de pruebas, arquitectura, matriz de riesgos, decisiones
 └── reports/                    ← evidencias: sonar, fortify, dependency-check, zap, performance
@@ -281,7 +281,7 @@ flashstore report go-no-go                # decisión GO/NO-GO (código 0 = GO)
 | 1 | Backend, base de datos, Redis, RabbitMQ, Docker, pruebas unitarias, k6 del escenario crítico | ✅ |
 | 2 | PWA (web, desktop y móvil) con cola offline | ✅ |
 | 3 | CLI `flashstore` | ✅ |
-| 4 | Terraform (Azure) + Ansible | ⏳ |
+| 4 | Terraform (Google Cloud) + Ansible — ver [infrastructure/README.md](infrastructure/README.md) | 🔄 |
 | 5 | Jenkins: pipeline de infraestructura y pipeline de calidad/seguridad con GO/NO-GO | ⏳ |
 | 6 | Insomnia, Cypress, Maestro, ZAP, k6 (load/stress/spike), Lighthouse | ⏳ |
 | 7 | Cupones + regresión | ⏳ |

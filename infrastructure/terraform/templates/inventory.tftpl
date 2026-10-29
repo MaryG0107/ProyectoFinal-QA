@@ -1,0 +1,6 @@
+# Generado por Terraform. NO editar a mano: se reescribe en cada "terraform apply".
+[flashstore]
+flashstore-${environment} ansible_host=${host} ansible_user=${ssh_user} ansible_ssh_private_key_file=${private_key_path}
+
+[flashstore:vars]
+ansible_python_interpreter=/usr/bin/python3
