@@ -5,7 +5,7 @@ using static FlashStore.Cli.Core.Verdicts;
 namespace FlashStore.Cli.Commands;
 
 /// <summary>
-/// flashstore report go-no-go [--strict]: reúne los resultados guardados por los demás comandos y decide GO o NO-GO.
+/// flashstore report go-no-go [--strict] [--security]: reúne los resultados guardados por los demás comandos y decide GO o NO-GO.
 /// Genera reports/go-no-go.md y reports/go-no-go.json. Código 0 = GO, 1 = NO-GO (Jenkins detiene el despliegue).
 /// </summary>
 public static class ReportCommands
@@ -14,10 +14,13 @@ public static class ReportCommands
     {
         if (args.At(1) != "go-no-go")
         {
-            throw new UsageException("Uso: flashstore report go-no-go [--strict]");
+            throw new UsageException("Uso: flashstore report go-no-go [--strict] [--security]");
         }
 
         var strict = args.Has("strict");
+
+        // Jenkins (pipeline de seguridad) usa --security para que el criterio de seguridad sea obligatorio.
+        var requireSecurity = strict || args.Has("security");
 
         // La salud se vuelve a medir en este momento; lo demás sale de reports/cli/*.json.
         await HealthCommand.RunAsync(ParsedArgs.Parse(["health"]), context);
@@ -34,7 +37,9 @@ public static class ReportCommands
             FromFile(context, "test-api", "Pruebas de API", "Colección de Insomnia sin fallas", true),
             FromFile(context, "test-e2e", "Pruebas E2E", "Cypress sin fallas", strict),
             FromFile(context, "test-load", "Rendimiento", "Umbrales de k6 cumplidos", strict),
-            FromFile(context, "queues", "Mensajería", "0 mensajes en las DLQ", strict)
+            FromFile(context, "queues", "Mensajería", "0 mensajes en las DLQ", strict),
+            FromFile(context, "security", "Seguridad",
+                "gitleaks, dependencias, trivy, checkov y ZAP sin hallazgos altos o críticos", requireSecurity)
         };
 
         var decision = Decide(criteria);

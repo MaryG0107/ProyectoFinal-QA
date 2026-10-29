@@ -51,3 +51,8 @@ cli/**/nupkg/
 ansible/inventory/gcp.ini
 *.json.key
 flashstore-secrets.env
+
+# Reportes de los pipelines de Jenkins (fase 5)
+reports/security/
+reports/infra/
+infrastructure/terraform/tfplan

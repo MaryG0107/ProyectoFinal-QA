@@ -6,6 +6,13 @@
 terraform {
   required_version = ">= 1.6.0"
 
+  # Estado remoto compartido entre la VM controladora y Jenkins (D-18).
+  # El nombre del bucket va en backend.hcl:
+  #   terraform init -backend-config=backend.hcl
+  backend "gcs" {
+    prefix = "flashstore/qa"
+  }
+
   required_providers {
     google = {
       source  = "hashicorp/google"

@@ -9,6 +9,7 @@ namespace FlashStore.Cli.Core;
 ///   --ssh   / FLASHSTORE_SSH   usuario@host[:puerto]      (vacío = Docker local; ej. mary@localhost:2222 para la VM)
 ///   --dir   / FLASHSTORE_DIR   carpeta del proyecto donde corre Docker Compose
 ///                              (local: se busca docker-compose.yml hacia arriba; remoto: ~/ProyectoFinal-QA)
+///   FLASHSTORE_SSH_OPTS        opciones extra para ssh (ej. "-i ~/.ssh/flashstore_gcp -o BatchMode=yes")
 /// </summary>
 public sealed partial class CliContext
 {

@@ -37,6 +37,17 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range = "10.10.0.0/24"
   region        = var.region
   network       = google_compute_network.vpc.id
+
+  # Acceso a las APIs de Google por la red interna (checkov CKV_GCP_74)
+  private_ip_google_access = true
+
+  # Registro de tráfico de la subred para auditoría (checkov CKV_GCP_26).
+  # Muestreo bajo e intervalo de 10 min para que el costo sea despreciable.
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.2
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
 }
 
 # ---------- Firewall ----------
@@ -82,6 +93,9 @@ resource "google_compute_address" "public_ip" {
 
 # ---------- VM ----------
 resource "google_compute_instance" "app" {
+  # Riesgos aceptados (documentados en docs/decisiones-tecnicas.md, D-18):
+  #checkov:skip=CKV_GCP_40:La VM de QA necesita IP pública para pruebas desde el equipo; el firewall solo admite allowed_cidrs
+  #checkov:skip=CKV_GCP_38:Se usa el cifrado en reposo administrado por Google; llaves CSEK propias no aportan en un ambiente efímero de QA
   name         = "${local.name_prefix}-vm"
   machine_type = var.machine_type
   zone         = var.zone

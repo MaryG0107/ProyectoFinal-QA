@@ -1,0 +1,161 @@
+// =============================================================
+// FlashStore - PIPELINE 1: infraestructura en Google Cloud
+//
+//   crear    : validar -> plan -> aprobación -> apply -> Ansible -> verificación con el CLI
+//   destruir : plan de destrucción -> aprobación -> destroy
+//
+// Credenciales de Jenkins (Manage Jenkins > Credentials), ver jenkins/README.md:
+//   gcp-terraform-sa    Secret file    llave JSON de la cuenta de servicio terraform-flashstore
+//   flashstore-gcp-ssh  SSH key        usuario mary + llave privada flashstore_gcp
+//   flashstore-secrets  Secret file    flashstore-secrets.env (Postgres, RabbitMQ, JWT)
+// =============================================================
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timeout(time: 90, unit: 'MINUTES')
+    }
+
+    parameters {
+        choice(name: 'ACCION', choices: ['crear', 'destruir'],
+               description: 'crear = Terraform + Ansible; destruir = terraform destroy (borra todo en Google Cloud)')
+        choice(name: 'INVENTORY_STRATEGY', choices: ['Atomic', 'Unsafe'],
+               description: 'Atomic = release GO. Unsafe = sobreventa intencional para el escenario NO-GO (rc1)')
+        string(name: 'LOGIN_RATE_LIMIT', defaultValue: '1000',
+               description: 'Inicios de sesión por minuto por IP. 1000 en QA para la venta de 300 compradores; 10 en producción')
+        booleanParam(name: 'AUTO_APROBAR', defaultValue: false,
+                     description: 'Si se marca, no pide confirmación antes de aplicar el plan')
+    }
+
+    environment {
+        TF_DIR                         = 'infrastructure/terraform'
+        TF_IN_AUTOMATION               = 'true'
+        TF_INPUT                       = '0'
+        TF_VAR_project_id              = 'flashstore-qa'
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-terraform-sa')
+        DEPLOY_KEY                     = credentials('flashstore-gcp-ssh')
+        SECRETS_FILE                   = credentials('flashstore-secrets')
+        DOTNET_CLI_TELEMETRY_OPTOUT    = '1'
+        DOTNET_NOLOGO                  = '1'
+    }
+
+    stages {
+        stage('Preparar') {
+            steps {
+                sh '''
+                    scripts/check-clock.sh || [ $? -eq 2 ]
+                    mkdir -p reports/infra "$HOME/.ssh"
+                    chmod 700 "$HOME/.ssh"
+                    terraform version | head -1
+                    ansible --version | head -1
+                    ssh-keygen -y -f "$DEPLOY_KEY" > "$WORKSPACE/reports/infra/deploy_key.pub"
+                '''
+                script {
+                    def ip = sh(script: 'curl -fsS --max-time 15 https://ifconfig.me', returnStdout: true).trim()
+                    if (!(ip ==~ /\d{1,3}(\.\d{1,3}){3}/)) {
+                        error("No se pudo obtener la IP pública de Jenkins (respuesta: ${ip})")
+                    }
+                    env.KNOWN_HOSTS                 = sh(script: 'echo "$HOME/.ssh/known_hosts_flashstore_gcp"', returnStdout: true).trim()
+                    env.TF_VAR_allowed_cidrs        = "[\"${ip}/32\"]"
+                    env.TF_VAR_credentials_file     = env.GOOGLE_APPLICATION_CREDENTIALS
+                    env.TF_VAR_ssh_user             = env.DEPLOY_KEY_USR
+                    env.TF_VAR_ssh_public_key_path  = "${env.WORKSPACE}/reports/infra/deploy_key.pub"
+                    env.TF_VAR_ssh_private_key_path = env.DEPLOY_KEY
+                    echo "Firewall abierto solo para ${ip}/32 · acción: ${params.ACCION}"
+                }
+            }
+        }
+
+        stage('Terraform: validar') {
+            steps {
+                sh '''
+                    terraform -chdir="$TF_DIR" fmt -check -recursive
+                    terraform -chdir="$TF_DIR" init -backend-config=backend.hcl
+                    terraform -chdir="$TF_DIR" validate
+                '''
+            }
+        }
+
+        stage('Terraform: plan') {
+            steps {
+                script {
+                    def destroyFlag = params.ACCION == 'destruir' ? '-destroy' : ''
+                    sh """
+                        terraform -chdir="\$TF_DIR" plan ${destroyFlag} -out=tfplan
+                        terraform -chdir="\$TF_DIR" show -no-color tfplan > reports/infra/plan.txt
+                    """
+                }
+            }
+        }
+
+        stage('Aprobación') {
+            when { expression { !params.AUTO_APROBAR } }
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: "¿Aplicar el plan (${params.ACCION}) en Google Cloud? Revise plan.txt en los artefactos o en el log.",
+                          ok: 'Aplicar'
+                }
+            }
+        }
+
+        stage('Terraform: apply') {
+            steps {
+                sh '''
+                    terraform -chdir="$TF_DIR" apply tfplan
+                    if [ "$ACCION" = "crear" ]; then
+                        terraform -chdir="$TF_DIR" output -json > reports/infra/outputs.json
+                    fi
+                '''
+            }
+        }
+
+        stage('Ansible: desplegar') {
+            when { expression { params.ACCION == 'crear' } }
+            steps {
+                // La VM puede ser nueva (otra llave de host): se olvida la anterior.
+                sh '''
+                    rm -f "$KNOWN_HOSTS"
+                    set -a; . "$SECRETS_FILE"; set +a
+                    cd ansible
+                    ANSIBLE_SSH_ARGS="-o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=$KNOWN_HOSTS" \
+                    ansible-playbook playbooks/site.yml \
+                        -e "ansible_ssh_private_key_file=$DEPLOY_KEY" \
+                        -e "flashstore_inventory_strategy=$INVENTORY_STRATEGY" \
+                        -e "flashstore_login_rate_limit=$LOGIN_RATE_LIMIT"
+                '''
+            }
+        }
+
+        stage('Verificar con el CLI') {
+            when { expression { params.ACCION == 'crear' } }
+            steps {
+                sh '''
+                    IP=$(terraform -chdir="$TF_DIR" output -raw public_ip)
+                    export FLASHSTORE_API="http://$IP:5000"
+                    export FLASHSTORE_SSH="$DEPLOY_KEY_USR@$IP:22"
+                    export FLASHSTORE_SSH_OPTS="-i $DEPLOY_KEY -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=$KNOWN_HOSTS"
+                    dotnet run --project cli/FlashStore.Cli -- health
+                    dotnet run --project cli/FlashStore.Cli -- db stats
+                    echo "PWA: http://$IP:3000   API: http://$IP:5000/swagger"
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'rm -f "$TF_DIR/tfplan" reports/infra/deploy_key.pub'
+            archiveArtifacts artifacts: 'reports/infra/*.json, reports/infra/*.txt, reports/cli/*.json', allowEmptyArchive: true
+        }
+        success {
+            echo "Pipeline de infraestructura terminado: ${params.ACCION}."
+        }
+        failure {
+            echo 'Falló el pipeline de infraestructura. Si el error dice "Invalid JWT", sincronice el reloj de la VM.'
+        }
+    }
+}
