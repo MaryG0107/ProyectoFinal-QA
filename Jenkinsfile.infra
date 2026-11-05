@@ -117,6 +117,8 @@ pipeline {
             when { expression { params.ACCION == 'crear' } }
             steps {
                 // La VM puede ser nueva (otra llave de host): se olvida la anterior.
+                // Sin ControlMaster/ControlPersist: el proceso ssh que queda en segundo plano
+                // mantiene abierta la salida y Jenkins se queda esperando después del PLAY RECAP.
                 sh '''
                     rm -f "$KNOWN_HOSTS"
                     # sh corre con -x (traza): se apaga para que los secretos no aparezcan en el log
@@ -124,7 +126,7 @@ pipeline {
                     set -a; . "$SECRETS_FILE"; set +a
                     set -x
                     cd ansible
-                    ANSIBLE_SSH_ARGS="-o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=$KNOWN_HOSTS" \
+                    ANSIBLE_SSH_ARGS="-o ControlMaster=no -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=$KNOWN_HOSTS" \
                     ansible-playbook playbooks/site.yml \
                         -e "ansible_ssh_private_key_file=$DEPLOY_KEY" \
                         -e "flashstore_inventory_strategy=$INVENTORY_STRATEGY" \
