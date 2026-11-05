@@ -160,7 +160,7 @@ pipeline {
                     CLI="dotnet run --project cli/FlashStore.Cli --"
                     $CLI test api || true
                     $CLI db reset-flash-sale --yes
-                    $CLI sale simulate --buyers "$COMPRADORES" || true
+                    $CLI sale simulate --buyers "${COMPRADORES:-300}" || true
                     $CLI queue dlq || true
                 '''
             }

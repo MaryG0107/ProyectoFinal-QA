@@ -12,8 +12,10 @@ RUN dotnet restore backend/src/FlashStore.Api/FlashStore.Api.csproj
 COPY backend/src/ backend/src/
 RUN dotnet publish backend/src/FlashStore.Api/FlashStore.Api.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
-# ---------- Etapa 2: ejecución (imagen pequeña, usuario sin privilegios) ----------
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# ---------- Etapa 2: ejecución (imagen "chiseled": sin shell ni apt, usuario sin privilegios) ----------
+# trivy encontró vulnerabilidades HIGH en apt/libapt de la imagen Debian; la variante chiseled
+# no incluye gestor de paquetes. "-extra" trae ICU y tzdata (fechas y cultura es-GT).
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled-extra AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080

@@ -129,7 +129,7 @@ resource "google_compute_instance" "app" {
     # Se usa la llave del equipo en lugar de OS Login para que Ansible y Jenkins
     # entren con el mismo usuario y la misma llave.
     enable-oslogin         = "FALSE"
-    block-project-ssh-keys = "TRUE"
+    block-project-ssh-keys = true
     ssh-keys               = "${var.ssh_user}:${local.ssh_public_key}"
   }
 
