@@ -127,8 +127,11 @@ pipeline {
             when { expression { params.ESCANEAR_IMAGENES } }
             steps {
                 sh '''
+                    # sh corre con -x (traza): se apaga para que los secretos no aparezcan en el log
+                    set +x
                     set -a; . "$SECRETS_FILE"; set +a
                     export POSTGRES_PASSWORD="$FLASHSTORE_POSTGRES_PASSWORD" RABBITMQ_PASSWORD="$FLASHSTORE_RABBITMQ_PASSWORD" JWT_KEY="$FLASHSTORE_JWT_KEY"
+                    set -x
                     docker compose -p flashstore-ci build --pull api worker web
                     for svc in api worker web; do
                         docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v flashstore-trivy-cache:/root/.cache \
