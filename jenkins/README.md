@@ -5,7 +5,7 @@ Jenkins corre en la VM Ubuntu (`http://localhost:8080` desde la laptop) y maneja
 | Job | Archivo | Qué hace |
 |---|---|---|
 | `flashstore-infra` | `Jenkinsfile.infra` | **Pipeline 1.** Valida Terraform, muestra el plan, pide aprobación, crea o destruye la infraestructura en Google Cloud, despliega con Ansible y verifica con el CLI |
-| `flashstore-seguridad` | `Jenkinsfile` | **Pipeline 2.** Análisis de secretos, Terraform, dependencias e imágenes; ZAP contra la app desplegada; pruebas unitarias, de API y la venta relámpago; compuerta de seguridad y decisión **GO/NO-GO** |
+| `flashstore-seguridad` | `Jenkinsfile` | **Pipeline 2.** Lint (ESLint, dotnet format), SAST (Semgrep, en lugar de Fortify), SonarQube, secretos (gitleaks), Terraform (checkov), dependencias (npm audit, NuGet, OWASP Dependency-Check), imágenes (trivy), DAST (ZAP), pruebas unitarias, API (inso), E2E (Cypress), venta relámpago y rendimiento (k6); compuertas de calidad y seguridad y decisión **GO/NO-GO** |
 
 ```
 Pipeline 1 (flashstore-infra)                     Pipeline 2 (flashstore-seguridad)
@@ -19,6 +19,7 @@ apply → Ansible → CLI health / db stats           → gitleaks ∥ checkov �
 ## Requisitos en la VM
 
 - Jenkins 2.4xx o más reciente, con el usuario `jenkins` en el grupo `docker`.
+- SonarQube Community en la misma VM: `docker run -d --name sonarqube --restart unless-stopped -p 9000:9000 sonarqube:community` (requiere `vm.max_map_count >= 262144`).
 - Terraform, Ansible, gcloud, .NET 8 SDK, Node/npm e `inso`. Ver el Paso de preparación más abajo.
 - Plugins: Pipeline, Git, Credentials Binding, Timestamper, Workspace Cleanup, **Pipeline: Stage View** y **HTML Publisher**.
 
@@ -29,6 +30,8 @@ apply → Ansible → CLI health / db stats           → gitleaks ∥ checkov �
 | `gcp-terraform-sa` | Secret file | `~/.gcp/terraform-flashstore.json` |
 | `flashstore-gcp-ssh` | SSH Username with private key | Usuario `mary`, llave `~/.ssh/flashstore_gcp` |
 | `flashstore-secrets` | Secret file | `~/.gcp/flashstore-secrets.env` |
+| `sonar-token` | Secret text | Token de análisis de SonarQube (`http://localhost:9000` → My Account → Security) |
+| `nvd-api-key` | Secret text | Llave gratuita de NVD para Dependency-Check (`nvd.nist.gov/developers/request-an-api-key`) |
 
 Ninguna llave ni contraseña se escribe en el repositorio ni aparece en el log: Jenkins las enmascara.
 

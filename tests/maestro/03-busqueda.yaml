@@ -1,0 +1,15 @@
+# Flujo 3: búsqueda en el catálogo
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "03 · Búsqueda de productos"
+tags: [critico]
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Consola FlashBox X - Edición Limitada"
+- tapOn: "Buscar"
+- inputText: "audífonos"
+- assertVisible: "Audífonos Bluetooth Wave"
+- assertNotVisible: "Laptop Orion 14\" 16GB RAM"
+- takeScreenshot: maestro-03-busqueda

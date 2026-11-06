@@ -1,0 +1,18 @@
+# Flujo 7 (negativo): la tarjeta sin fondos se rechaza con un mensaje claro
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "07 · Pago rechazado (negativo)"
+tags: [negativo]
+---
+- runFlow: 05-carrito.yaml
+- tapOn: "Confirmar pedido"
+- tapOn:
+    css: "[data-testid='card-number']"
+- inputText: "4000000000000002"
+- tapOn:
+    css: "[data-testid='pay-button']"
+- extendedWaitUntil:
+    visible: "Pago rechazado.*"
+    timeout: 15000
+- takeScreenshot: maestro-07-pago-rechazado

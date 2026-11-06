@@ -94,6 +94,23 @@
   retries: "{{ flashstore_health_retries }}"
   delay: "{{ flashstore_health_delay }}"
 
+# Los scripts de db/init solo corren solos cuando la base es nueva. Las migraciones
+# posteriores (03-cupones, ...) son idempotentes y se aplican en cada despliegue.
+- name: Aplicar migraciones posteriores de la base de datos
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      for f in db/init/0[3-9]-*.sql; do
+        [ -e "$f" ] || continue
+        echo "Aplicando $f"
+        docker exec -i flashstore-postgres psql -v ON_ERROR_STOP=1 -q \
+          -U {{ flashstore_postgres_user }} -d {{ flashstore_postgres_db }} < "$f"
+      done
+    chdir: "{{ flashstore_app_dir }}"
+    executable: /bin/bash
+  register: flashstore_migrations
+  changed_when: "'Aplicando' in flashstore_migrations.stdout"
+
 - name: Estado de los contenedores
   ansible.builtin.command:
     cmd: docker compose ps --format "table {{ '{{' }}.Name{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"

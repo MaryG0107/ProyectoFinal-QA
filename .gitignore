@@ -56,3 +56,8 @@ flashstore-secrets.env
 reports/security/
 reports/infra/
 infrastructure/terraform/tfplan
+
+# Bloque B: calidad, rendimiento y herramientas descargadas por el pipeline
+reports/quality/
+.tools/
+tests/cypress/results/

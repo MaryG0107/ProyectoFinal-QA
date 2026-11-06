@@ -119,6 +119,7 @@ El **producto 1** ("Consola FlashBox X – Edición Limitada") inicia con **5 un
 | GET | `/api/orders` · `/api/orders/{id}` | JWT | Mis pedidos (un cliente no puede ver pedidos ajenos → 403) |
 | POST | `/api/orders/{id}/cancel` | JWT | Cancelar pedido pendiente (el Worker devuelve el stock) |
 | POST | `/api/payments` | JWT | Pago simulado (`4111111111111111` aprueba, `4000000000000002` rechaza) |
+| POST | `/api/coupons/validate` | JWT | Valida un cupón contra el subtotal y devuelve el descuento (`FLASH10`, `BIENVENIDA50`; negativos: `EXPIRADO`, `INACTIVO`, `AGOTADO`, `NAVIDAD`) |
 | GET | `/api/notifications` | JWT | Notificaciones generadas por el Worker |
 | GET | `/api/admin/outbox` | admin | Eventos pendientes de publicar |
 | GET | `/health` | — | Estado de PostgreSQL, Redis y RabbitMQ |
