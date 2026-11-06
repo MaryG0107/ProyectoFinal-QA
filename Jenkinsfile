@@ -197,11 +197,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
                     sh '''
                         set +x
-                        echo "Dependency-Check: escaneando (la primera vez descarga la base NVD)..."
+                        # Sin llave de NVD (credencial con el valor "sin-llave") se usa la base ya descargada
+                        # en el volumen flashstore-depcheck-data y no se intenta actualizar.
+                        if [ "$NVD_API_KEY" = "sin-llave" ]; then NVD_ARGS="--noupdate"; else NVD_ARGS="--nvdApiKey $NVD_API_KEY"; fi
+                        echo "Dependency-Check: escaneando..."
                         docker run --rm -v "$WORKSPACE:/src:ro" -v flashstore-depcheck-data:/usr/share/dependency-check/data \
                             -v "$WORKSPACE/$SEC/dependency-check:/report" "$DEPCHECK_IMAGE" \
                             --scan /src --project FlashStore --out /report --format JSON --format HTML \
-                            --nvdApiKey "$NVD_API_KEY" --enableExperimental --disableAssembly \
+                            $NVD_ARGS --enableExperimental --disableAssembly \
                             --nodeAuditSkipDevDependencies --nodePackageSkipDevDependencies \
                             --exclude "**/node_modules/**" --exclude "**/bin/**" --exclude "**/obj/**" \
                             --exclude "**/reports/**" --exclude "**/.tools/**" --exclude "**/tests/cypress/**" || true
