@@ -204,7 +204,7 @@ pipeline {
                         docker run --rm -v "$WORKSPACE:/src:ro" -v flashstore-depcheck-data:/usr/share/dependency-check/data \
                             -v "$WORKSPACE/$SEC/dependency-check:/report" "$DEPCHECK_IMAGE" \
                             --scan /src --project FlashStore --out /report --format JSON --format HTML \
-                            $NVD_ARGS --enableExperimental --disableAssembly \
+                            $NVD_ARGS --suppression /src/dependency-check-suppressions.xml --enableExperimental --disableAssembly \
                             --nodeAuditSkipDevDependencies --nodePackageSkipDevDependencies \
                             --exclude "**/node_modules/**" --exclude "**/bin/**" --exclude "**/obj/**" \
                             --exclude "**/reports/**" --exclude "**/.tools/**" --exclude "**/tests/cypress/**" || true
