@@ -199,6 +199,7 @@ app.MapAuthEndpoints();
 app.MapProductEndpoints();
 app.MapCartEndpoints();
 app.MapOrderEndpoints();
+app.MapCouponEndpoints();
 
 app.Run();
 

@@ -1,0 +1,19 @@
+# Subflujo reutilizable: inicia sesión con el cliente de prueba
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+  EMAIL: cliente20@flashstore.test
+  PASSWORD: Test1234!
+---
+- launchApp:
+    clearState: true
+- tapOn: "Ingresar"
+- assertVisible: "Iniciar sesión"
+- tapOn: "Correo electrónico"
+- inputText: ${EMAIL}
+- tapOn: "Contraseña"
+- inputText: ${PASSWORD}
+- tapOn:
+    text: "Ingresar"
+    index: 1
+- assertVisible: "Mis pedidos"

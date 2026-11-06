@@ -1,0 +1,17 @@
+# Flujo 6 (crítico): checkout completo con tarjeta aprobada
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "06 · Compra con pago aprobado"
+tags: [critico]
+---
+- runFlow: 05-carrito.yaml
+- tapOn: "Confirmar pedido"
+- assertVisible: "Pagar"
+- tapOn: "Número de tarjeta (simulada)"
+- inputText: "4111111111111111"
+- tapOn: "Pagar Q.*"
+- extendedWaitUntil:
+    visible: "Pago aprobado.*"
+    timeout: 15000
+- takeScreenshot: maestro-06-compra-aprobada

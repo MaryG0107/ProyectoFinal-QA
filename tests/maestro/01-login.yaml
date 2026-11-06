@@ -1,0 +1,10 @@
+# Flujo 1 (crítico): el cliente inicia sesión y ve su menú
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "01 · Login correcto"
+tags: [critico, smoke]
+---
+- runFlow: _login.yaml
+- assertVisible: "Mis pedidos"
+- takeScreenshot: maestro-01-login

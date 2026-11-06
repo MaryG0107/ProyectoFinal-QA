@@ -2142,6 +2142,394 @@
       "settingEncodeUrl": true,
       "settingRebuildPath": true,
       "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_00",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[+] Cupón válido FLASH10 (10 %)",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"flash10\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(200);\nconst b = body();\ninsomnia.test('Descuento calculado en el servidor: 44.90', () => insomnia.expect(b.discount).to.eql(44.9));\ninsomnia.test('Total = subtotal - descuento', () => insomnia.expect(b.total).to.eql(404.1));\ninsomnia.test('Código normalizado a mayúsculas', () => insomnia.expect(b.code).to.eql('FLASH10'));",
+      "metaSortKey": 0,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_01",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[+] Cupón con tope BIENVENIDA50 (máx. Q200)",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"BIENVENIDA50\",\n  \"subtotal\": 3999.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(200);\ninsomnia.test('Respeta el descuento máximo de Q200', () => insomnia.expect(body().discount).to.eql(200));",
+      "metaSortKey": 100,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_02",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Cupón vencido",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"EXPIRADO\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(422);\ninsomnia.test('Mensaje de vencido', () => insomnia.expect(body().error).to.include('vencido'));",
+      "metaSortKey": 200,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_03",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Cupón inactivo",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"INACTIVO\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(422);",
+      "metaSortKey": 300,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_04",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Cupón agotado",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"AGOTADO\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(422);",
+      "metaSortKey": 400,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_05",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Cupón inexistente",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"NOEXISTE\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(404);\ninsomnia.test('Mensaje de no existe', () => insomnia.expect(body().error).to.include('no existe'));",
+      "metaSortKey": 500,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_06",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Subtotal menor al mínimo",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"FLASH10\",\n  \"subtotal\": 50.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(422);\ninsomnia.test('Indica el monto mínimo', () => insomnia.expect(body().error).to.include('desde'));",
+      "metaSortKey": 600,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_07",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Código con inyección SQL",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"' OR 1=1--\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(400);\ninsomnia.test('No expone detalles de la base', () => insomnia.expect(JSON.stringify(body())).to.not.include('SQL'));",
+      "metaSortKey": 700,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_08",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Subtotal negativo",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"FLASH10\",\n  \"subtotal\": -10\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(400);",
+      "metaSortKey": 800,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_07b_09",
+      "_type": "request",
+      "parentId": "fld_07b",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "url": "{{ _.base_url }}/api/coupons/validate",
+      "name": "[-] Sin sesión",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"FLASH10\",\n  \"subtotal\": 449.0\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "preRequestScript": "",
+      "afterResponseScript": "// --- utilidades comunes ---\nconst code = typeof insomnia.response.code === 'number' ? insomnia.response.code : Number(insomnia.response.status);\nconst header = (name) => { const h = insomnia.response.headers.find((x) => x.key.toLowerCase() === name.toLowerCase()); return h ? h.value : undefined; };\nconst body = () => { try { return insomnia.response.json(); } catch (e) { return null; } };\nconst status = (expected) => insomnia.test('Código HTTP ' + expected, () => insomnia.expect(code).to.eql(expected));\n// --- pruebas ---\nstatus(401);",
+      "metaSortKey": 900,
+      "isPrivate": false,
+      "pathParameters": [],
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "fld_07b",
+      "_type": "request_group",
+      "parentId": "wrk_flashstore_qa",
+      "modified": 1793300000000,
+      "created": 1793300000000,
+      "name": "07B Cupones (regresión)",
+      "description": "POST /api/coupons/validate. Se ejecuta antes del cierre de sesión porque usa el token del cliente.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 750
     }
   ]
 }

@@ -1,8 +1,9 @@
 # Colección de Insomnia – API de FlashStore
 
-Pruebas de la API REST: **59 casos** (28 positivos `[+]` y 31 negativos `[-]`), incluidas
+Pruebas de la API REST: **69 casos y 111 aserciones** (30 positivos `[+]` y 39 negativos `[-]`), incluidas
 pruebas de **autorización** (IDOR, roles, token alterado o cerrado) y de reglas de negocio
-(idempotencia, precio manipulado, doble pago, cantidades límite).
+(idempotencia, precio manipulado, doble pago, cantidades límite) y de **cupones** (grupo 07B,
+agregado para las pruebas de regresión).
 
 Cada solicitud tiene un *after-response script* con sus aserciones (`insomnia.test`), por lo
 que el resultado es verde o rojo sin revisar a mano.
@@ -103,3 +104,13 @@ y 1 producto **inactivo** (no aparece en el catálogo).
 | API-57 | Administración de productos | [+] Admin actualiza stock | `PATCH /api/products/{{ _.nuevo_producto_id }}/stock` | 204 |
 | API-58 | Cierre de sesión | [+] Logout segundo cliente | `POST /api/auth/logout` | 204 |
 | API-59 | Cierre de sesión | [-] Token cerrado ya no sirve | `GET /api/auth/me` | 401 |
+| API-60 | Cupones (regresión) | [+] Cupón válido FLASH10 (10 %) | `POST /api/coupons/validate` | 200 |
+| API-61 | Cupones (regresión) | [+] Cupón con tope BIENVENIDA50 (máx. Q200) | `POST /api/coupons/validate` | 200 |
+| API-62 | Cupones (regresión) | [-] Cupón vencido | `POST /api/coupons/validate` | 422 |
+| API-63 | Cupones (regresión) | [-] Cupón inactivo | `POST /api/coupons/validate` | 422 |
+| API-64 | Cupones (regresión) | [-] Cupón agotado | `POST /api/coupons/validate` | 422 |
+| API-65 | Cupones (regresión) | [-] Cupón inexistente | `POST /api/coupons/validate` | 404 |
+| API-66 | Cupones (regresión) | [-] Subtotal menor al mínimo | `POST /api/coupons/validate` | 422 |
+| API-67 | Cupones (regresión) | [-] Código con inyección SQL | `POST /api/coupons/validate` | 400 |
+| API-68 | Cupones (regresión) | [-] Subtotal negativo | `POST /api/coupons/validate` | 400 |
+| API-69 | Cupones (regresión) | [-] Sin sesión | `POST /api/coupons/validate` | 401 |

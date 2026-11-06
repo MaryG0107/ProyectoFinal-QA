@@ -1,0 +1,13 @@
+# Orden de ejecución de los flujos de Maestro (los subflujos no se ejecutan solos)
+flows:
+  - "0*.yaml"
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - 01-login
+    - 02-login-negativo
+    - 03-busqueda
+    - 04-busqueda-sin-resultados
+    - 05-carrito
+    - 06-compra-aprobada
+    - 07-pago-rechazado
