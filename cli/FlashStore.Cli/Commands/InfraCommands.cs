@@ -16,35 +16,35 @@ public static class InfraCommands
         switch (args.At(1))
         {
             case "stats":
-            {
-                var rows = new List<IReadOnlyList<string>> { new[] { "Total de llaves", await containers.RedisAsync("DBSIZE") } };
-                foreach (var (label, pattern) in new[] { ("Catálogo", "product*"), ("Sesiones", "session:*"), ("Carritos", "cart:*") })
                 {
-                    var keys = await ScanAsync(containers, pattern);
-                    rows.Add([label, keys.Count.ToString()]);
-                }
+                    var rows = new List<IReadOnlyList<string>> { new[] { "Total de llaves", await containers.RedisAsync("DBSIZE") } };
+                    foreach (var (label, pattern) in new[] { ("Catálogo", "product*"), ("Sesiones", "session:*"), ("Carritos", "cart:*") })
+                    {
+                        var keys = await ScanAsync(containers, pattern);
+                        rows.Add([label, keys.Count.ToString()]);
+                    }
 
-                Output.Title("Redis");
-                Output.PrintTable(["Indicador", "Valor"], rows);
-                return 0;
-            }
+                    Output.Title("Redis");
+                    Output.PrintTable(["Indicador", "Valor"], rows);
+                    return 0;
+                }
 
             case "clear-catalog":
-            {
-                var keys = new List<string>();
-                foreach (var pattern in CatalogPatterns)
                 {
-                    keys.AddRange(await ScanAsync(containers, pattern));
-                }
+                    var keys = new List<string>();
+                    foreach (var pattern in CatalogPatterns)
+                    {
+                        keys.AddRange(await ScanAsync(containers, pattern));
+                    }
 
-                foreach (var batch in keys.Distinct().Chunk(100))
-                {
-                    await containers.RedisAsync(["DEL", .. batch]);
-                }
+                    foreach (var batch in keys.Distinct().Chunk(100))
+                    {
+                        await containers.RedisAsync(["DEL", .. batch]);
+                    }
 
-                Output.Ok($"{keys.Count} llave(s) del catálogo borradas. Sesiones y carritos se conservan.");
-                return 0;
-            }
+                    Output.Ok($"{keys.Count} llave(s) del catálogo borradas. Sesiones y carritos se conservan.");
+                    return 0;
+                }
 
             default:
                 throw new UsageException("Uso: flashstore cache stats | clear-catalog");
