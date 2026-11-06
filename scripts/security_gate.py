@@ -14,6 +14,8 @@ Política (se bloquea el despliegue si se incumple cualquiera):
   - checkov (Terraform): 0 controles fallidos (los riesgos aceptados se
     marcan en el código con #checkov:skip y su justificación)
   - ZAP (PWA y API): 0 alertas de riesgo alto
+  - Semgrep (SAST, alternativa a Fortify, D-20): 0 hallazgos de severidad ERROR
+  - OWASP Dependency-Check: 0 vulnerabilidades con CVSS >= 7 (HIGH o CRITICAL)
 Si falta el reporte de una herramienta, cuenta como falla: no se puede dar
 GO sobre algo que no se ejecutó.
 
@@ -159,6 +161,40 @@ def check_zap(base: str) -> dict:
                 {"alerts": alerts[:30]})
 
 
+def check_semgrep(base: str) -> dict:
+    path = os.path.join(base, "semgrep.json")
+    if not os.path.exists(path):
+        return missing("semgrep", "semgrep.json")
+    data = load(path) or {}
+    results = data.get("results", []) or []
+    errors = [r for r in results if str(r.get("extra", {}).get("severity", "")).upper() == "ERROR"]
+    warnings = [r for r in results if str(r.get("extra", {}).get("severity", "")).upper() == "WARNING"]
+    findings = [f"[{r.get('extra', {}).get('severity')}] {r.get('check_id', '').split('.')[-1]} "
+                f"({r.get('path')}:{r.get('start', {}).get('line')})" for r in errors + warnings][:30]
+    return tool("semgrep", len(errors) == 0, len(errors),
+                f"SAST: {len(errors)} hallazgos ERROR, {len(warnings)} WARNING (no bloquean).",
+                {"findings": findings})
+
+
+def check_dependency_check(base: str) -> dict:
+    path = os.path.join(base, "dependency-check", "dependency-check-report.json")
+    if not os.path.exists(path):
+        return missing("dependency-check", "dependency-check/dependency-check-report.json")
+    data = load(path) or {}
+    blocking = []
+    total = 0
+    for dep in data.get("dependencies", []) or []:
+        for vuln in dep.get("vulnerabilities", []) or []:
+            total += 1
+            score = (vuln.get("cvssv3") or {}).get("baseScore") or (vuln.get("cvssv2") or {}).get("score") or 0
+            sev = str(vuln.get("severity", "")).upper()
+            if sev in BLOCKING or float(score) >= 7.0:
+                blocking.append(f"{dep.get('fileName')}: {vuln.get('name')} ({sev or score})")
+    return tool("dependency-check", len(blocking) == 0, len(blocking),
+                f"Dependency-Check: {total} vulnerabilidades, {len(blocking)} con CVSS >= 7.",
+                {"items": blocking[:30]})
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Compuerta de seguridad de FlashStore")
     parser.add_argument("--dir", default="reports/security")
@@ -167,11 +203,12 @@ def main() -> int:
     args = parser.parse_args()
 
     checks = [check_gitleaks(args.dir), check_dotnet(args.dir), check_npm(args.dir),
-              check_trivy(args.dir), check_checkov(args.dir), check_zap(args.dir)]
+              check_trivy(args.dir), check_checkov(args.dir), check_zap(args.dir),
+              check_semgrep(args.dir), check_dependency_check(args.dir)]
     passed = all(c["passed"] for c in checks)
     failing = [c["tool"] for c in checks if not c["passed"]]
 
-    summary = ("Seguridad: sin hallazgos bloqueantes en las 6 herramientas."
+    summary = (f"Seguridad: sin hallazgos bloqueantes en las {len(checks)} herramientas."
                if passed else f"Seguridad: hallazgos bloqueantes en {', '.join(failing)}.")
     result = {
         "name": "security",

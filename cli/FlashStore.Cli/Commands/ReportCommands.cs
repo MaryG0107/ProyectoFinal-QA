@@ -19,7 +19,7 @@ public static class ReportCommands
 
         var strict = args.Has("strict");
 
-        // Jenkins (pipeline de seguridad) usa --security para que el criterio de seguridad sea obligatorio.
+        // Jenkins (pipeline de seguridad) usa --security para que los criterios de calidad y seguridad sean obligatorios.
         var requireSecurity = strict || args.Has("security");
 
         // La salud se vuelve a medir en este momento; lo demás sale de reports/cli/*.json.
@@ -38,8 +38,10 @@ public static class ReportCommands
             FromFile(context, "test-e2e", "Pruebas E2E", "Cypress sin fallas", strict),
             FromFile(context, "test-load", "Rendimiento", "Umbrales de k6 cumplidos", strict),
             FromFile(context, "queues", "Mensajería", "0 mensajes en las DLQ", strict),
+            FromFile(context, "quality", "Calidad",
+                "Lint sin errores y Quality Gate de SonarQube en verde", requireSecurity),
             FromFile(context, "security", "Seguridad",
-                "gitleaks, dependencias, trivy, checkov y ZAP sin hallazgos altos o críticos", requireSecurity)
+                "gitleaks, Semgrep, Dependency-Check, npm/NuGet, trivy, checkov y ZAP sin hallazgos altos o críticos", requireSecurity)
         };
 
         var decision = Decide(criteria);
