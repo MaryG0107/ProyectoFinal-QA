@@ -39,3 +39,25 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Reportes generados por el CLI y las pruebas (Jenkins los archiva como artefactos)
+reports/cli/
+reports/unit/
+reports/go-no-go.*
+reports/performance/*.json
+cli/**/nupkg/
+
+# Google Cloud (fase 4): inventario generado por Terraform y llaves
+ansible/inventory/gcp.ini
+*.json.key
+flashstore-secrets.env
+
+# Reportes de los pipelines de Jenkins (fase 5)
+reports/security/
+reports/infra/
+infrastructure/terraform/tfplan
+
+# Bloque B: calidad, rendimiento y herramientas descargadas por el pipeline
+reports/quality/
+.tools/
+tests/cypress/results/

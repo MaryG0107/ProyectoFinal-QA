@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CLI de FlashStore. Sin paquetes NuGet externos: solo la librería estándar de .NET 8.
+    Menos dependencias = menos superficie de vulnerabilidades (dotnet list package con cero paquetes de terceros).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>flashstore</AssemblyName>
+    <RootNamespace>FlashStore.Cli</RootNamespace>
+    <Version>1.0.0</Version>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>flashstore</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FlashStore.UnitTests" />
+  </ItemGroup>
+
+</Project>

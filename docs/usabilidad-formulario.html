@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de usabilidad FlashStore</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: una columna tipo formulario; moderadora arriba, participante abajo, resultado al final */
+:root{
+  --bg:#f7f5f3; --surface:#ffffff; --fg:#1d1a17; --muted:#6b625a; --line:#e3ddd6;
+  --accent:#e8551e; --accent-fg:#ffffff; --ok:#1f8a4c;
+  --display:"Outfit",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121317; --surface:#1b1d23; --fg:#ecebe8; --muted:#a19a92; --line:#2d3038;
+  --accent:#ff6a2f; --accent-fg:#16110d; --ok:#43c37b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121317; --surface:#1b1d23; --fg:#ecebe8; --muted:#a19a92; --line:#2d3038;
+  --accent:#ff6a2f; --accent-fg:#16110d; --ok:#43c37b; color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:1.9rem}
+h2{font-size:1.25rem}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{display:grid;gap:4px;font-size:.9rem}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.task{display:grid;gap:10px;padding-block:12px;border-top:1px solid var(--line)}
+.task:first-of-type{border-top:0;padding-top:0}
+.task p{margin:0}
+.task .say{font-weight:600}
+.task .ok{font-size:.85rem;color:var(--muted)}
+.task input[type=number]{width:7rem}
+.q{display:grid;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:0}
+.q p{margin:0;font-weight:600}
+.scale{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.scale span{font-size:.8rem;color:var(--muted)}
+.scale input{position:absolute;opacity:0;width:1px;height:1px}
+.scale label{display:inline-grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;cursor:pointer;font-family:var(--mono);background:var(--bg)}
+.scale input:checked+label{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.scale input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.score{font-family:var(--display);font-size:2.4rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.85rem;font-weight:600;border:1px solid currentColor}
+.out{font-family:var(--mono);font-size:.85rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;white-space:pre-wrap;word-break:break-word;min-width:0}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;background:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.creds{font-family:var(--mono);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header style="display:grid;gap:6px">
+    <span class="eyebrow">Proyecto final QA · UMG Cobán</span>
+    <h1>Prueba de usabilidad FlashStore</h1>
+    <p class="muted" style="margin:0">La moderadora llena la parte de tareas. Al final, el participante contesta las 10 preguntas. Abajo sale la línea lista para copiar.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="t-datos">
+    <h2 id="t-datos">Participante</h2>
+    <div class="row">
+      <label for="pid">Número
+        <select id="pid">
+          <option value="1">P1</option><option value="2">P2</option><option value="3">P3</option><option value="4">P4</option><option value="5">P5</option>
+        </select>
+      </label>
+      <p class="creds" style="margin:0">Cuenta: <strong id="cuenta">cliente21@flashstore.test</strong> · Test1234!</p>
+    </div>
+    <p class="muted" style="margin:0">Leer en voz alta: "Vamos a probar una tienda en línea, no a usted. No hay respuestas incorrectas. Le voy a pedir 5 tareas; trate de hacerlas sin ayuda y diga en voz alta lo que va pensando. Si se traba, puede decir 'me rindo'."</p>
+  </section>
+
+  <section class="panel" aria-labelledby="t-tareas">
+    <h2 id="t-tareas">Tareas (las anota la moderadora)</h2>
+    <div id="tareas"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="t-sus">
+    <h2 id="t-sus">Cuestionario SUS (lo contesta el participante)</h2>
+    <p class="muted" style="margin:0">1 = totalmente en desacuerdo · 5 = totalmente de acuerdo</p>
+    <div id="sus"></div>
+    <label for="coment">¿Qué fue lo más difícil o qué cambiaría?
+      <input id="coment" type="text" placeholder="Escriba aquí su comentario">
+    </label>
+  </section>
+
+  <section class="panel" aria-labelledby="t-res">
+    <h2 id="t-res">Resultado</h2>
+    <div class="row" style="align-items:center">
+      <span class="score" id="score">—</span>
+      <span class="pill" id="estado">Faltan respuestas</span>
+    </div>
+    <p class="muted" style="margin:0" id="exito">Tareas logradas: 0 de 5</p>
+    <div class="out" id="linea">Complete las tareas y las 10 preguntas.</div>
+    <div class="row">
+      <button type="button" id="copiar">Copiar línea</button>
+      <button type="button" class="ghost" id="nuevo">Siguiente participante</button>
+    </div>
+    <p class="muted" id="aviso" style="margin:0" role="status"></p>
+  </section>
+</div>
+
+<script>
+const TAREAS=[
+ ["Busque unos audífonos.","Encuentra “Audífonos Bluetooth Wave”"],
+ ["Inicie sesión con la cuenta que le di.","Ve “Mis pedidos” arriba"],
+ ["Compre los audífonos y pague con la tarjeta 4111 1111 1111 1111.","Ve “Pago aprobado”"],
+ ["Revise en qué estado está su pedido.","Entra a “Mis pedidos” y ve “Pagado”"],
+ ["Compre otro producto y pague con la tarjeta 4000 0000 0000 0002. ¿Qué pasó?","Explica que el pago fue rechazado"]];
+const PREG=[
+ "Creo que me gustaría usar esta tienda con frecuencia.",
+ "La tienda me pareció innecesariamente compleja.",
+ "Me pareció fácil de usar.",
+ "Creo que necesitaría ayuda de una persona técnica para usarla.",
+ "Las funciones de la tienda están bien integradas.",
+ "Hay demasiadas inconsistencias en la tienda.",
+ "Creo que la mayoría de personas aprendería a usarla muy rápido.",
+ "Me pareció muy complicada de usar.",
+ "Me sentí seguro(a) usando la tienda.",
+ "Tuve que aprender muchas cosas antes de poder usarla."];
+const $=id=>document.getElementById(id);
+$("tareas").innerHTML=TAREAS.map((t,i)=>`
+ <div class="task">
+  <p class="say">T${i+1}. “${t[0]}”</p>
+  <p class="ok">Lograda si: ${t[1]}</p>
+  <div class="row">
+   <label for="t${i}l">¿La logró?<select id="t${i}l"><option value="">—</option><option value="1">Sí (1)</option><option value="0">No (0)</option></select></label>
+   <label for="t${i}s">Tiempo (s)<input id="t${i}s" type="number" min="0" inputmode="numeric"></label>
+   <label for="t${i}e">Errores<input id="t${i}e" type="number" min="0" value="0" inputmode="numeric"></label>
+  </div>
+ </div>`).join("");
+$("sus").innerHTML=PREG.map((p,i)=>`
+ <div class="q" role="radiogroup" aria-labelledby="q${i}t">
+  <p id="q${i}t">${i+1}. ${p}</p>
+  <div class="scale"><span>Desacuerdo</span>
+   ${[1,2,3,4,5].map(v=>`<input type="radio" name="q${i}" id="q${i}v${v}" value="${v}"><label for="q${i}v${v}">${v}</label>`).join("")}
+   <span>Acuerdo</span></div>
+ </div>`).join("");
+
+function calc(){
+  const pid=$("pid").value;
+  $("cuenta").textContent=`cliente2${pid}@flashstore.test`;
+  const ans=PREG.map((_,i)=>{const r=document.querySelector(`input[name=q${i}]:checked`);return r?+r.value:null});
+  const tareas=TAREAS.map((_,i)=>({l:$(`t${i}l`).value,s:$(`t${i}s`).value,e:$(`t${i}e`).value||"0"}));
+  const logradas=tareas.filter(t=>t.l==="1").length;
+  $("exito").textContent=`Tareas logradas: ${logradas} de 5`;
+  const completo=ans.every(a=>a!==null);
+  let sus=null;
+  if(completo){
+    let odd=0,even=0;ans.forEach((a,i)=>{if(i%2===0)odd+=a;else even+=a});
+    sus=((odd-5)+(25-even))*2.5;
+    $("score").textContent=sus.toFixed(1);
+    const ok=sus>=68;
+    $("estado").textContent=ok?"Sobre la meta (≥ 68)":"Bajo la meta (< 68)";
+    $("estado").style.color=ok?"var(--ok)":"var(--accent)";
+  }else{$("score").textContent="—";$("estado").textContent="Faltan respuestas";$("estado").style.color="var(--muted)"}
+  const tt=tareas.map((t,i)=>`T${i+1}: ${t.l===""?"?":t.l}, ${t.s||"?"}s, ${t.e}`).join(" | ");
+  $("linea").textContent=`P${pid} | ${tt} | SUS: ${ans.map(a=>a??"?").join(",")}${sus!==null?` (=${sus.toFixed(1)})`:""} | Comentario: ${$("coment").value||"-"}`;
+}
+document.addEventListener("input",calc);document.addEventListener("change",calc);
+$("copiar").addEventListener("click",()=>{
+  const txt=$("linea").textContent;
+  navigator.clipboard.writeText(txt).then(()=>{$("aviso").textContent="Línea copiada. Pégala en el chat."})
+   .catch(()=>{const r=document.createRange();r.selectNodeContents($("linea"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("aviso").textContent="Selecciona y copia con Ctrl+C."});
+});
+$("nuevo").addEventListener("click",()=>{
+  document.querySelectorAll("input[type=radio]").forEach(r=>r.checked=false);
+  TAREAS.forEach((_,i)=>{$(`t${i}l`).value="";$(`t${i}s`).value="";$(`t${i}e`).value="0"});
+  $("coment").value="";
+  const p=$("pid");if(p.selectedIndex<4)p.selectedIndex++;
+  $("aviso").textContent="";calc();window.scrollTo({top:0});
+});
+calc();
+</script>
+</body>
+</html>

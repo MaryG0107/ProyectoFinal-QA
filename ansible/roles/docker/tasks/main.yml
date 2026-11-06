@@ -1,0 +1,50 @@
+---
+# Instala Docker Engine + Compose v2 desde el repositorio oficial de Docker.
+
+- name: Repositorio oficial de Docker (formato deb822, descarga la llave GPG)
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: [deb]
+    uris: https://download.docker.com/linux/ubuntu
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
+    components: [stable]
+    architectures: [amd64]
+    signed_by: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Instalar Docker Engine y plugin de Compose
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+    lock_timeout: 600
+
+- name: Docker activo y al arranque
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Usuario de despliegue en el grupo docker (para el CLI por SSH)
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+  register: docker_group_result
+
+- name: Reconectar para que el grupo docker aplique
+  ansible.builtin.meta: reset_connection
+
+- name: Verificar Docker Compose
+  ansible.builtin.command: docker compose version
+  register: docker_compose_version
+  changed_when: false
+
+- name: Versión instalada
+  ansible.builtin.debug:
+    msg: "{{ docker_compose_version.stdout }}"

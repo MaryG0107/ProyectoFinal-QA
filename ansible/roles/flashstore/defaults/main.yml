@@ -1,0 +1,27 @@
+---
+# Carpeta de la app en la VM. Coincide con el valor por defecto del CLI (--dir).
+flashstore_app_dir: "/home/{{ ansible_user }}/ProyectoFinal-QA"
+
+# Qué versión del repositorio se despliega (rama, commit o etiqueta).
+# Solo se despliega lo que está COMMITEADO: los cambios sin commit no viajan.
+flashstore_git_ref: HEAD
+flashstore_repo_root: "{{ playbook_dir }}/../.."
+flashstore_release_archive: "/tmp/flashstore-release.tar.gz"
+
+# Comportamiento de la app
+flashstore_inventory_strategy: Atomic      # Unsafe = release NO-GO (rc1)
+flashstore_login_rate_limit: 10            # 1000 solo para la prueba k6 de 300 usuarios
+flashstore_simulate_consumer_failure: ""
+
+# Secretos: se leen de variables de entorno (archivo ~/.gcp/flashstore-secrets.env
+# en la VM controladora, o credenciales de Jenkins). Nunca se escriben en el repo.
+flashstore_postgres_db: flashstore
+flashstore_postgres_user: flashstore
+flashstore_postgres_password: "{{ lookup('ansible.builtin.env', 'FLASHSTORE_POSTGRES_PASSWORD') }}"
+flashstore_rabbitmq_user: flashstore
+flashstore_rabbitmq_password: "{{ lookup('ansible.builtin.env', 'FLASHSTORE_RABBITMQ_PASSWORD') }}"
+flashstore_jwt_key: "{{ lookup('ansible.builtin.env', 'FLASHSTORE_JWT_KEY') }}"
+
+# Espera de salud de la API
+flashstore_health_retries: 40
+flashstore_health_delay: 10

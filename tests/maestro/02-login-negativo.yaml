@@ -1,0 +1,23 @@
+# Flujo 2 (negativo): contraseña incorrecta, no se crea sesión
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "02 · Login con contraseña incorrecta (negativo)"
+tags: [negativo]
+---
+- launchApp:
+    clearState: true
+- tapOn: "Ingresar"
+- tapOn:
+    css: "[data-testid='login-email']"
+- inputText: "cliente20@flashstore.test"
+- tapOn:
+    css: "[data-testid='login-password']"
+- inputText: "ClaveMala123"
+- tapOn:
+    css: "[data-testid='login-submit']"
+- extendedWaitUntil:
+    visible: "Correo o contraseña incorrectos."
+    timeout: 10000
+- assertNotVisible: "Mis pedidos"
+- takeScreenshot: maestro-02-login-negativo

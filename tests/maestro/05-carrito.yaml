@@ -1,0 +1,13 @@
+# Flujo 5 (crítico): agregar un producto al carrito
+url: ${BASE_URL}
+env:
+  BASE_URL: http://localhost:3000
+name: "05 · Agregar al carrito"
+tags: [critico]
+---
+- runFlow: _login.yaml
+- tapOn: "Agregar Audífonos Bluetooth Wave al carrito"
+- tapOn: "Carrito.*"
+- assertVisible: "Audífonos Bluetooth Wave"
+- assertVisible: "Confirmar pedido"
+- takeScreenshot: maestro-05-carrito

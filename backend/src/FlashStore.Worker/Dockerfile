@@ -11,8 +11,8 @@ RUN dotnet restore backend/src/FlashStore.Worker/FlashStore.Worker.csproj
 COPY backend/src/ backend/src/
 RUN dotnet publish backend/src/FlashStore.Worker/FlashStore.Worker.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
-# ---------- Etapa 2: ejecución ----------
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS runtime
+# ---------- Etapa 2: ejecución (imagen chiseled: sin shell ni apt) ----------
+FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled-extra AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 USER app

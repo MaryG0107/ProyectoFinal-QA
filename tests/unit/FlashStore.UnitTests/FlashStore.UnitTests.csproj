@@ -17,5 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\backend\src\FlashStore.Domain\FlashStore.Domain.csproj" />
+    <ProjectReference Include="..\..\..\cli\FlashStore.Cli\FlashStore.Cli.csproj" />
   </ItemGroup>
 </Project>

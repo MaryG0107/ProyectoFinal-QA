@@ -1,0 +1,14 @@
+{
+  "name": "flashstore-cypress",
+  "private": true,
+  "version": "1.0.0",
+  "description": "FlashStore - pruebas E2E de la PWA con Cypress",
+  "scripts": {
+    "cy:open": "cypress open --e2e --browser electron",
+    "cy:run": "cypress run --e2e --browser electron",
+    "cy:smoke": "cypress run --e2e --browser electron --spec \"e2e/0[1-3]*.cy.js\""
+  },
+  "devDependencies": {
+    "cypress": "15.21.1"
+  }
+}
