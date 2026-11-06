@@ -32,11 +32,28 @@ public sealed class Shell(CliContext context)
                 remote.Append(" < ").Append(QuoteForPosix(stdinFileRelative));
             }
 
-            return RunAsync("ssh", ["-p", ssh.Port.ToString(), $"{ssh.User}@{ssh.Host}", remote.ToString()], null, capture, null);
+            return RunAsync("ssh", BuildSshArgs(ssh, Environment.GetEnvironmentVariable("FLASHSTORE_SSH_OPTS"), remote.ToString()), null, capture, null);
         }
 
         var stdin = stdinFileRelative is null ? null : Path.Combine(context.ComposeDir, stdinFileRelative);
         return RunAsync("docker", args, context.ComposeDir, capture, stdin);
+    }
+
+    /// <summary>
+    /// Argumentos de ssh. FLASHSTORE_SSH_OPTS agrega opciones extra separadas por espacios
+    /// (Jenkins: "-i llave -o StrictHostKeyChecking=accept-new -o BatchMode=yes").
+    /// </summary>
+    internal static IReadOnlyList<string> BuildSshArgs(SshTarget ssh, string? extraOptions, string remoteCommand)
+    {
+        var args = new List<string> { "-p", ssh.Port.ToString() };
+        if (!string.IsNullOrWhiteSpace(extraOptions))
+        {
+            args.AddRange(extraOptions.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        }
+
+        args.Add($"{ssh.User}@{ssh.Host}");
+        args.Add(remoteCommand);
+        return args;
     }
 
     /// <summary>Ejecuta un programa en la máquina local (dotnet, inso, npm, k6...).</summary>

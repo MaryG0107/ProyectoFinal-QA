@@ -15,6 +15,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SECRETS="${FLASHSTORE_SECRETS:-$HOME/.gcp/flashstore-secrets.env}"
 TF_DIR="$ROOT/infrastructure/terraform"
 
+# Credenciales para el proveedor y para el estado remoto (bucket GCS)
+export GOOGLE_APPLICATION_CREDENTIALS="${GOOGLE_APPLICATION_CREDENTIALS:-$HOME/.gcp/terraform-flashstore.json}"
+
+# El reloj desfasado hace que Google rechace el token (Invalid JWT)
+"$ROOT/scripts/check-clock.sh" || [[ $? -eq 2 ]]   # 2 = no se pudo comprobar: se continúa
+
 if [[ ! -f "$SECRETS" ]]; then
   echo "ERROR: no existe $SECRETS. Ejecute primero scripts/gcp-secrets-init.sh" >&2
   exit 2
@@ -30,7 +36,7 @@ source "$SECRETS"
 set +a
 
 echo "==> [1/2] Terraform"
-terraform -chdir="$TF_DIR" init -input=false
+terraform -chdir="$TF_DIR" init -input=false -backend-config=backend.hcl
 terraform -chdir="$TF_DIR" apply -input=false -auto-approve
 
 echo "==> [2/2] Ansible"

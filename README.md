@@ -281,8 +281,8 @@ flashstore report go-no-go                # decisión GO/NO-GO (código 0 = GO)
 | 1 | Backend, base de datos, Redis, RabbitMQ, Docker, pruebas unitarias, k6 del escenario crítico | ✅ |
 | 2 | PWA (web, desktop y móvil) con cola offline | ✅ |
 | 3 | CLI `flashstore` | ✅ |
-| 4 | Terraform (Google Cloud) + Ansible — ver [infrastructure/README.md](infrastructure/README.md) | 🔄 |
-| 5 | Jenkins: pipeline de infraestructura y pipeline de calidad/seguridad con GO/NO-GO | ⏳ |
+| 4 | Terraform (Google Cloud) + Ansible — ver [infrastructure/README.md](infrastructure/README.md) | ✅ |
+| 5 | Jenkins: pipeline de infraestructura y pipeline de seguridad con GO/NO-GO — ver [jenkins/README.md](jenkins/README.md) | 🔄 |
 | 6 | Insomnia, Cypress, Maestro, ZAP, k6 (load/stress/spike), Lighthouse | ⏳ |
 | 7 | Cupones + regresión | ⏳ |
 | 8 | Plan de pruebas, matriz de riesgos, informe final y presentación | ⏳ |

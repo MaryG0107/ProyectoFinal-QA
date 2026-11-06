@@ -26,6 +26,8 @@ VM Ubuntu local (controladora)                 Google Cloud · proyecto flashsto
 | Ansible | `ansible/roles/docker` | Docker Engine + Compose desde el repositorio oficial |
 | Ansible | `ansible/roles/flashstore` | Copia la versión commiteada del repo, genera `.env` (600), ejecuta `docker compose up -d --build` y espera `/health` |
 | Scripts | `scripts/gcp-up.sh` / `gcp-down.sh` | Crear y desplegar todo, o destruirlo todo, con un solo comando |
+| Scripts | `scripts/check-clock.sh` | Detiene la ejecución si el reloj está desfasado (Google rechaza el token) |
+| Jenkins | `Jenkinsfile.infra` | Lo mismo que `gcp-up.sh`/`gcp-down.sh`, con aprobación manual (ver `jenkins/README.md`) |
 
 ## Seguridad
 
@@ -41,6 +43,21 @@ VM Ubuntu local (controladora)                 Google Cloud · proyecto flashsto
 - Alerta de presupuesto `flashstore-limite` de 20 USD (avisos al 50 %, 90 % y 100 %).
 - Al terminar cada sesión: `scripts/gcp-down.sh`.
 
+## Estado remoto (D-18)
+
+El estado de Terraform vive en el bucket `gs://flashstore-qa-tfstate-958936877144` (prefijo `flashstore/qa`, con versionado). Así lo comparten la VM controladora y Jenkins. Se crea una sola vez:
+
+```bash
+gcloud storage buckets create gs://flashstore-qa-tfstate-958936877144 \
+  --project=flashstore-qa --location=us-central1 \
+  --uniform-bucket-level-access --public-access-prevention
+gcloud storage buckets update gs://flashstore-qa-tfstate-958936877144 --versioning
+gcloud storage buckets add-iam-policy-binding gs://flashstore-qa-tfstate-958936877144 \
+  --member="serviceAccount:terraform-flashstore@flashstore-qa.iam.gserviceaccount.com" \
+  --role="roles/storage.objectAdmin"
+terraform -chdir=infrastructure/terraform init -backend-config=backend.hcl -migrate-state
+```
+
 ## Uso
 
 Requisitos en la controladora: `gcloud`, `terraform`, `ansible`, la llave `~/.gcp/terraform-flashstore.json` y la llave SSH `~/.ssh/flashstore_gcp`.
@@ -52,7 +69,8 @@ cp infrastructure/terraform/example.tfvars infrastructure/terraform/terraform.tf
 nano infrastructure/terraform/terraform.tfvars      # su IP pública /32
 
 # Revisar el plan sin crear nada
-terraform -chdir=infrastructure/terraform init
+export GOOGLE_APPLICATION_CREDENTIALS=~/.gcp/terraform-flashstore.json
+terraform -chdir=infrastructure/terraform init -backend-config=backend.hcl
 terraform -chdir=infrastructure/terraform plan
 
 # Crear infraestructura + desplegar (release GO)
@@ -73,4 +91,5 @@ Ansible despliega **solo lo que está commiteado** (`git archive`). Para despleg
 - `ansible-lint`: 0 fallas, perfil *production*.
 - `ansible-playbook --syntax-check`: correcto.
 - `shellcheck` de los scripts: sin observaciones.
-- `terraform fmt -check` y `terraform validate`: se ejecutan en la controladora (ver evidencias de la fase 4).
+- `terraform fmt -check`, `validate`, `plan`, `apply` y `destroy`: ejecutados en la controladora (evidencias de la fase 4).
+- `checkov`: 23 controles aprobados, 0 fallidos, 2 riesgos aceptados y justificados en `main.tf`.

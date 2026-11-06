@@ -1,0 +1,4 @@
+# Falsos positivos revisados manualmente (FP-01 en el registro de defectos).
+# .env.example solo trae un texto de ejemplo, no una llave real.
+# Se ignora unicamente esta coincidencia exacta (commit:archivo:regla:linea).
+f889cb5bb24cfba8908ee67c90b0122bc399412c:.env.example:generic-api-key:17

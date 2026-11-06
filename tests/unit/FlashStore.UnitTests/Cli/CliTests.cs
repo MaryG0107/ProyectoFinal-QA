@@ -90,6 +90,23 @@ public class CliEnvAndSshTests
     }
 
     [Fact]
+    public void SshArgs_SinOpcionesExtra()
+    {
+        var args = Shell.BuildSshArgs(new SshTarget("mary", "35.1.2.3", 22), null, "docker ps");
+
+        Assert.Equal(new[] { "-p", "22", "mary@35.1.2.3", "docker ps" }, args);
+    }
+
+    [Fact]
+    public void SshArgs_ConOpcionesDeJenkins_VanAntesDelDestino()
+    {
+        var args = Shell.BuildSshArgs(new SshTarget("mary", "35.1.2.3", 22),
+            "  -i /tmp/key   -o BatchMode=yes ", "docker ps");
+
+        Assert.Equal(new[] { "-p", "22", "-i", "/tmp/key", "-o", "BatchMode=yes", "mary@35.1.2.3", "docker ps" }, args);
+    }
+
+    [Fact]
     public void RequireService_SoloAceptaServiciosDelCompose()
     {
         Assert.Equal("api", EnvCommands.RequireService("api"));

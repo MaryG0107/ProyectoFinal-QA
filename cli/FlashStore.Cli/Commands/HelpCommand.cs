@@ -39,13 +39,14 @@ public static class HelpCommand
           test api                       Colección de Insomnia con inso
           test e2e [--web URL]           Cypress
           test load [--reset]            k6 (flash-sale.js)
-          report go-no-go [--strict]     Decisión GO/NO-GO (código 0 = GO, 1 = NO-GO)
+          report go-no-go [--strict] [--security]   Decisión GO/NO-GO (código 0 = GO, 1 = NO-GO)
 
         OPCIONES GLOBALES
           --api <url>        API de FlashStore          (FLASHSTORE_API, por defecto http://localhost:5000)
           --ssh <u@host:p>   Ejecutar Docker en la VM   (FLASHSTORE_SSH, ej. mary@localhost:2222)
           --dir <ruta>       Carpeta de Docker Compose  (FLASHSTORE_DIR, remoto: ~/ProyectoFinal-QA)
           --json             Salida en JSON (health, product list)
+          FLASHSTORE_SSH_OPTS  Opciones extra de ssh (ej. "-i ~/.ssh/flashstore_gcp -o BatchMode=yes")
           --help             Esta ayuda
 
         CÓDIGOS DE SALIDA
