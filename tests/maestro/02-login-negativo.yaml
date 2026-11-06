@@ -8,13 +8,16 @@ tags: [negativo]
 - launchApp:
     clearState: true
 - tapOn: "Ingresar"
-- tapOn: "Correo electrónico"
+- tapOn:
+    css: "[data-testid='login-email']"
 - inputText: "cliente20@flashstore.test"
-- tapOn: "Contraseña"
+- tapOn:
+    css: "[data-testid='login-password']"
 - inputText: "ClaveMala123"
 - tapOn:
-    text: "Ingresar"
-    index: 1
-- assertVisible: "Credenciales inválidas."
+    css: "[data-testid='login-submit']"
+- extendedWaitUntil:
+    visible: "Correo o contraseña incorrectos."
+    timeout: 10000
 - assertNotVisible: "Mis pedidos"
 - takeScreenshot: maestro-02-login-negativo

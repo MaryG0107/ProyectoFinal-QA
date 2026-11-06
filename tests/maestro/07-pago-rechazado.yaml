@@ -7,9 +7,11 @@ tags: [negativo]
 ---
 - runFlow: 05-carrito.yaml
 - tapOn: "Confirmar pedido"
-- tapOn: "Número de tarjeta (simulada)"
+- tapOn:
+    css: "[data-testid='card-number']"
 - inputText: "4000000000000002"
-- tapOn: "Pagar Q.*"
+- tapOn:
+    css: "[data-testid='pay-button']"
 - extendedWaitUntil:
     visible: "Pago rechazado.*"
     timeout: 15000

@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" tests="7" failures="4" time="419.298" timestamp="2026-11-06T12:25:24">
+    <testcase id="01 · Login correcto" name="01 · Login correcto" classname="01 · Login correcto" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\01-login.yaml" time="95.739" timestamp="2026-11-06T12:25:24" status="ERROR">
+      <properties>
+        <property name="tags" value="critico, smoke"/>
+      </properties>
+      <failure>Assertion is false: "Mis pedidos" is visible</failure>
+    </testcase>
+    <testcase id="02 · Login con contraseña incorrecta (negativo)" name="02 · Login con contraseña incorrecta (negativo)" classname="02 · Login con contraseña incorrecta (negativo)" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\02-login-negativo.yaml" time="67.815" timestamp="2026-11-06T12:26:59" status="SUCCESS">
+      <properties>
+        <property name="tags" value="negativo"/>
+      </properties>
+    </testcase>
+    <testcase id="03 · Búsqueda de productos" name="03 · Búsqueda de productos" classname="03 · Búsqueda de productos" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\03-busqueda.yaml" time="5.689" timestamp="2026-11-06T12:28:07" status="SUCCESS">
+      <properties>
+        <property name="tags" value="critico"/>
+      </properties>
+    </testcase>
+    <testcase id="04 · Búsqueda sin resultados (negativo)" name="04 · Búsqueda sin resultados (negativo)" classname="04 · Búsqueda sin resultados (negativo)" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\04-busqueda-sin-resultados.yaml" time="5.092" timestamp="2026-11-06T12:28:13" status="SUCCESS">
+      <properties>
+        <property name="tags" value="negativo"/>
+      </properties>
+    </testcase>
+    <testcase id="05 · Agregar al carrito" name="05 · Agregar al carrito" classname="05 · Agregar al carrito" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\05-carrito.yaml" time="81.648" timestamp="2026-11-06T12:28:18" status="ERROR">
+      <properties>
+        <property name="tags" value="critico"/>
+      </properties>
+      <failure>Assertion is false: "Mis pedidos" is visible</failure>
+    </testcase>
+    <testcase id="06 · Compra con pago aprobado" name="06 · Compra con pago aprobado" classname="06 · Compra con pago aprobado" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\06-compra-aprobada.yaml" time="81.548" timestamp="2026-11-06T12:29:40" status="ERROR">
+      <properties>
+        <property name="tags" value="critico"/>
+      </properties>
+      <failure>Assertion is false: "Mis pedidos" is visible</failure>
+    </testcase>
+    <testcase id="07 · Pago rechazado (negativo)" name="07 · Pago rechazado (negativo)" classname="07 · Pago rechazado (negativo)" file="C:\Users\Dell\Documents\decimo\QA\Proyecto Final\flashstore\tests\maestro\07-pago-rechazado.yaml" time="81.626" timestamp="2026-11-06T12:31:01" status="ERROR">
+      <properties>
+        <property name="tags" value="negativo"/>
+      </properties>
+      <failure>Assertion is false: "Mis pedidos" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>
